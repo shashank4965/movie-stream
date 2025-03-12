@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieStream</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #021526; /* Pearl color */
+            color: white;
+            margin: 0;
+            padding: 0;
+            font-size: x-large;
+            text-align: left;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #03446E; /* Matching container color */
+            padding: 15px 40px;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+        }
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 22px;
+        }
+        .search-bar {
+            margin-left: auto;
+        }
+        .search-bar input {
+            padding: 10px;
+            width: 300px;
+            font-size: 18px;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            max-width: 90%;
+            margin: auto;
+        }
+        .search-results {
+            text-align: left;
+            max-width: 350px;
+        
+            background: #03446E; /* Payne's Grey with transparency */
+            border-radius: 5px;
+            margin-left: 89%;
+           
+        }
+        .search-results div {
+            padding: 15px;
+            border-bottom: 1px solid #555;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .search-results div:hover {
+            background: #444;
+        }
+        a {
+            text-decoration: none;
+            color: white;
+            margin-right: 20px;
+        }
+        .movie-details-container {
+            
+            display:flex;
+            background: #03446E; /* Payne's Grey with transparency */
+            padding: 30px;
+            border-radius: 10px;
+            
+            margin-left: 30px;
+            max-width: 80%;
+            text-align: left;
+           
+            
+        }
+        .movie-poster img {
+            max-width: 300px; /* Larger poster */
+            border-radius: 10px;
+        }
+        .movie-info {
+            margin-left: 30px;
+            flex: 1;
+        }
+
+       
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo" style="margin-right: 15px;">MovieStream</div> 
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Genres</a>
+            <a href="#">Movies</a>
+            <a href="#">TV Shows</a>
+            <a href="#">Top IMDB</a>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="movieTitle" placeholder="Search movies..." oninput="searchMovies()">
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="search-results" id="searchResults"></div>
+        <div id="movie-details"></div>
+    </div>
+
+    <script>
+        const apiKey = "eb1c9b8d";
+
+        function searchMovies() {
+            const title = document.getElementById("movieTitle").value;
+            if (title.length < 3) {
+                document.getElementById("searchResults").innerHTML = "";
+                return;
+            }
+            const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(title)}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.Response === "True") {
+                        let resultsHtml = data.Search.map(movie => `
+                            <div onclick="getMovieDetails('${movie.imdbID}')">
+                                <strong>${movie.Title}</strong> (${movie.Year})
+                            </div>
+                        `).join("");
+                        document.getElementById("searchResults").innerHTML = resultsHtml;
+                    } else {
+                        document.getElementById("searchResults").innerHTML = "<p>No results found</p>";
+                    }
+                })
+                .catch(error => console.error("Error fetching movie data:", error));
+        }
+
+        function getMovieDetails(imdbID) {
+            document.getElementById("searchResults").innerHTML = "";
+            const url = `http://www.omdbapi.com/?apikey=${apiKey}&i=${imdbID}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.Response === "True") {
+                        document.getElementById("movie-details").innerHTML = `
+                            <div class="movie-details-container">
+                                <div class="movie-poster">
+                                    <img src="${data.Poster}" alt="${data.Title} Poster">
+                                </div>
+                                <div class="movie-info">
+                                    <h2>${data.Title} (${data.Year})</h2>
+                                    <p><strong>Genre:</strong> ${data.Genre}</p>
+                                    <p><strong>Plot:</strong> ${data.Plot}</p>
+                                    <a href="https://www.youtube.com/results?search_query=${data.Title}+trailer" target="_blank">Watch Trailer</a>
+                                    <a href="https://vidsrc.icu/embed/movie/${data.imdbID}" target="_blank">Watch Movie</a>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById("movie-details").innerHTML = "<p>Movie not found!</p>";
+                    }
+                })
+                .catch(error => console.error("Error fetching movie data:", error));
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
